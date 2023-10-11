@@ -2,10 +2,13 @@ package com.csdn.eval.discovery.jraft.handler;
 
 import com.csdn.eval.discovery.jraft.Kind;
 import com.csdn.eval.discovery.jraft.ServiceInstance;
+import com.csdn.eval.discovery.jraft.processor.GetServiceInstancesRequestRpcProcessor;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @Author: xiewenfeng
@@ -15,9 +18,11 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class ServiceDiscoveryRequestHandlerFactory {
 
+  private static final Logger logger = LoggerFactory
+      .getLogger(ServiceDiscoveryRequestHandlerFactory.class);
+
   /**
-   * 服务名称与服务实例列表（List）映射
-   * serverName:<serverId:instance>,使用 serverId 来做去重
+   * 服务名称与服务实例列表（List）映射 serverName:<serverId:instance>,使用 serverId 来做去重
    */
   private final Map<String, Map<String, ServiceInstance>> serviceNameToInstancesStorage = new ConcurrentHashMap<>();
 
@@ -44,6 +49,7 @@ public class ServiceDiscoveryRequestHandlerFactory {
     Map<String, ServiceInstance> serviceInstancesMap = serviceNameToInstancesStorage
         .computeIfAbsent(serviceName, n -> new LinkedHashMap<>());
     serviceInstancesMap.put(id, serviceInstance);
+    print();
   }
 
   public synchronized void delete(String id, String serviceName) {
@@ -53,6 +59,15 @@ public class ServiceDiscoveryRequestHandlerFactory {
 
   public Map<String, ServiceInstance> getServiceInstancesMap(String serviceName) {
     return serviceNameToInstancesStorage.computeIfAbsent(serviceName, n -> new LinkedHashMap<>());
+  }
+
+  private void print() {
+    serviceNameToInstancesStorage.forEach((k, v) -> {
+      logger.info(" key :{}", k);
+      v.forEach((nk, nv) -> {
+        logger.info(" n_key :{} + n_value:{}", nk, nv);
+      });
+    });
   }
 
 }

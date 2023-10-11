@@ -3,7 +3,7 @@ syntax = "proto3";
 package service.discovery;
 
 option java_package = "com.csdn.eval.discovery.jraft.proto";
-option java_outer_classname = "ServiceDiscoveryOuter";
+option java_outer_classname = "ServiceDiscoveryOuter2";
 
 message Registration {
   string id = 1;
@@ -11,6 +11,7 @@ message Registration {
   string host = 3;
   int32 port = 4;
   map<string, string> metadata = 5;
+  bool reversed = 6;
 }
 
 message HeartBeat {

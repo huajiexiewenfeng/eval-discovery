@@ -2,7 +2,6 @@ package com.csdn.eval.discovery.jraft.processor;
 
 import com.alipay.sofa.jraft.rpc.RpcContext;
 import com.alipay.sofa.jraft.rpc.RpcProcessor;
-import com.csdn.eval.discovery.jraft.ServiceDiscoveryServer;
 import com.csdn.eval.discovery.jraft.proto.ServiceDiscoveryOuter;
 import com.csdn.eval.discovery.jraft.proto.ServiceDiscoveryOuter.HeartBeat;
 
@@ -14,7 +13,10 @@ import com.csdn.eval.discovery.jraft.proto.ServiceDiscoveryOuter.HeartBeat;
  */
 public class HeartBeatRpcProcessor implements RpcProcessor<ServiceDiscoveryOuter.HeartBeat> {
 
-  public HeartBeatRpcProcessor(ServiceDiscoveryServer serviceDiscoveryServer) {
+  private final RpcProcessorService rpcProcessorService;
+
+  public HeartBeatRpcProcessor(RpcProcessorService rpcProcessorService) {
+    this.rpcProcessorService = rpcProcessorService;
   }
 
   @Override
@@ -24,6 +26,6 @@ public class HeartBeatRpcProcessor implements RpcProcessor<ServiceDiscoveryOuter
 
   @Override
   public String interest() {
-    return null;
+    return ServiceDiscoveryOuter.HeartBeat.class.getName();
   }
 }

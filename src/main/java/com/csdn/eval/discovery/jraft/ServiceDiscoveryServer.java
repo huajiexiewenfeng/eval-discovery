@@ -1,5 +1,6 @@
 package com.csdn.eval.discovery.jraft;
 
+import ch.qos.logback.classic.Level;
 import com.alipay.sofa.jraft.Node;
 import com.alipay.sofa.jraft.RaftGroupService;
 import com.alipay.sofa.jraft.conf.Configuration;
@@ -7,13 +8,16 @@ import com.alipay.sofa.jraft.entity.PeerId;
 import com.alipay.sofa.jraft.option.NodeOptions;
 import com.alipay.sofa.jraft.rpc.RaftRpcServerFactory;
 import com.alipay.sofa.jraft.rpc.RpcServer;
-import com.csdn.eval.discovery.jraft.handler.ServiceDiscoveryRequestHandlerFactory;
 import com.csdn.eval.discovery.jraft.processor.GetServiceInstancesRequestRpcProcessor;
 import com.csdn.eval.discovery.jraft.processor.HeartBeatRpcProcessor;
 import com.csdn.eval.discovery.jraft.processor.RegistrationRpcProcessor;
+import com.csdn.eval.discovery.jraft.processor.RpcProcessorImpl;
+import com.csdn.eval.discovery.jraft.processor.RpcProcessorService;
 import java.io.File;
 import java.io.IOException;
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @Author: xiewenfeng
@@ -39,9 +43,10 @@ public class ServiceDiscoveryServer {
     ServiceDiscoveryGrpcHelper.setRpcServer(rpcServer);
 
     // register business processor
-    rpcServer.registerProcessor(new RegistrationRpcProcessor(this));
-    rpcServer.registerProcessor(new GetServiceInstancesRequestRpcProcessor(this));
-    rpcServer.registerProcessor(new HeartBeatRpcProcessor(this));
+    RpcProcessorService rpcProcessorService = new RpcProcessorImpl(this);
+    rpcServer.registerProcessor(new RegistrationRpcProcessor(rpcProcessorService));
+    rpcServer.registerProcessor(new GetServiceInstancesRequestRpcProcessor(rpcProcessorService));
+    rpcServer.registerProcessor(new HeartBeatRpcProcessor(rpcProcessorService));
     // init state machine
     this.fsm = new ServiceDiscoveryStateMachine();
     // set fsm to nodeOptions
@@ -52,7 +57,7 @@ public class ServiceDiscoveryServer {
     // meta, must
     nodeOptions.setRaftMetaUri(dataPath + File.separator + "raft_meta");
     // snapshot, optional, generally recommended
-    nodeOptions.setSnapshotUri(dataPath + File.separator + "snapshot");
+//    nodeOptions.setSnapshotUri(dataPath + File.separator + "snapshot");
     // init raft group service framework
     this.raftGroupService = new RaftGroupService(groupId, serverId, nodeOptions, rpcServer);
     // start raft node
@@ -92,7 +97,7 @@ public class ServiceDiscoveryServer {
               "Usage : java com.alipay.sofa.jraft.example.counter.CounterServer {dataPath} {groupId} {serverId} {initConf}");
       System.out
           .println(
-              "Example: java com.alipay.sofa.jraft.example.counter.CounterServer /tmp/server1 counter 127.0.0.1:8081 127.0.0.1:8081,127.0.0.1:8082,127.0.0.1:8083");
+              "Example: java com.alipay.sofa.jraft.example.counter.CounterServer ");
       System.exit(1);
     }
     final String dataPath = args[0];
@@ -119,6 +124,9 @@ public class ServiceDiscoveryServer {
     }
     // set cluster configuration
     nodeOptions.setInitialConf(initConf);
+
+    ((ch.qos.logback.classic.Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME)).setLevel(
+        Level.INFO);
 
     // start raft server
     final ServiceDiscoveryServer counterServer = new ServiceDiscoveryServer(dataPath, groupId,
