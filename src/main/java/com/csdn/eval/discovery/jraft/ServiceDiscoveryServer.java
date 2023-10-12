@@ -8,6 +8,9 @@ import com.alipay.sofa.jraft.entity.PeerId;
 import com.alipay.sofa.jraft.option.NodeOptions;
 import com.alipay.sofa.jraft.rpc.RaftRpcServerFactory;
 import com.alipay.sofa.jraft.rpc.RpcServer;
+import com.csdn.eval.discovery.jraft.beat.ServiceDiscoveryCheckBeatThread;
+import com.csdn.eval.discovery.jraft.beat.ServiceDiscoveryHeartBeatThread;
+import com.csdn.eval.discovery.jraft.handler.ServiceDiscoveryRequestHandlerFactory;
 import com.csdn.eval.discovery.jraft.processor.GetServiceInstancesRequestRpcProcessor;
 import com.csdn.eval.discovery.jraft.processor.HeartBeatRpcProcessor;
 import com.csdn.eval.discovery.jraft.processor.RegistrationRpcProcessor;
@@ -62,6 +65,15 @@ public class ServiceDiscoveryServer {
     this.raftGroupService = new RaftGroupService(groupId, serverId, nodeOptions, rpcServer);
     // start raft node
     this.node = this.raftGroupService.start();
+    ServiceDiscoveryRequestHandlerFactory instanceFactory = ServiceDiscoveryRequestHandlerFactory
+        .getInstance();
+    instanceFactory.init();
+    instanceFactory.setRpcProcessorService(rpcProcessorService);
+    // 启动心跳检测线程
+    ServiceDiscoveryCheckBeatThread beatThread = new ServiceDiscoveryCheckBeatThread(
+        instanceFactory, fsm);
+    beatThread.setDaemon(true);
+    beatThread.start();
   }
 
   public ServiceDiscoveryStateMachine getFsm() {
@@ -89,7 +101,6 @@ public class ServiceDiscoveryServer {
 //    }
 //    return builder.build();
 //  }
-
   public static void main(final String[] args) throws IOException {
     if (args.length != 4) {
       System.out

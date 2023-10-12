@@ -13,11 +13,6 @@ import org.slf4j.LoggerFactory;
  */
 public class HeartBeatRequestHandler implements ServiceDiscoveryRequestHandler {
 
-  /**
-   * 服务超过30s没有心跳，视为自动下线
-   */
-  private final int expired = 30;
-
   private static final Logger logger = LoggerFactory.getLogger(HeartBeatRequestHandler.class);
 
   private ServiceDiscoveryRequestHandlerFactory factory;
@@ -32,8 +27,7 @@ public class HeartBeatRequestHandler implements ServiceDiscoveryRequestHandler {
     if (null == serviceInstance) {
       return;
     }
-    // todo
-
-    logger.info("{} has been deregistered at the node", serviceInstance);
+    factory.onBeat(serviceInstance);
+    logger.info("{} has been renewed at the node", serviceInstance);
   }
 }

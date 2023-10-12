@@ -1,6 +1,7 @@
 package com.csdn.eval.discovery.jraft;
 
 import com.csdn.eval.discovery.ServiceDiscovery;
+import com.csdn.eval.discovery.jraft.beat.ServiceDiscoveryHeartBeatThread;
 import com.csdn.eval.discovery.jraft.proto.ServiceDiscoveryOuter;
 import com.csdn.eval.discovery.jraft.proto.ServiceDiscoveryOuter.GetServiceInstancesRequest;
 import com.csdn.eval.discovery.jraft.proto.ServiceDiscoveryOuter.Registration;
@@ -49,6 +50,11 @@ public class JRaftServiceDiscovery implements ServiceDiscovery {
     } catch (Throwable e) {
       e.printStackTrace();
     }
+    // 注册成功后，启动心跳线程服务
+    ServiceDiscoveryHeartBeatThread beatThread = new ServiceDiscoveryHeartBeatThread(
+        serviceDiscoveryClient, serviceInstance);
+    beatThread.setDaemon(true);
+    beatThread.start();
   }
 
   @Override

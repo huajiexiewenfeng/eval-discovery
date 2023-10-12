@@ -52,10 +52,7 @@ public class ServiceDiscoveryStateMachine extends StateMachineAdapter {
       // 根据服务操作类型的不同来进行不同的业务操作
       if (operation != null) {
         Kind kind = operation.getKind();
-        ServiceDiscoveryRequestHandlerFactory instanceFactory = ServiceDiscoveryRequestHandlerFactory
-            .getInstance();
-        instanceFactory.init();
-        instanceFactory.getHandler(kind)
+        ServiceDiscoveryRequestHandlerFactory.getInstance().getHandler(kind)
             .doHandle(closure, (ServiceInstance) operation.getData());
         if (closure != null) {
           closure.run(Status.OK());

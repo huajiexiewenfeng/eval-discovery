@@ -32,6 +32,6 @@ public class DeRegistrationRequestHandler implements ServiceDiscoveryRequestHand
 
     factory.delete(id, serviceName);
 
-    logger.info("{} has been deregistered at the node", serviceInstance);
+    logger.info("{} has been deRegistered at the node", serviceInstance);
   }
 }
